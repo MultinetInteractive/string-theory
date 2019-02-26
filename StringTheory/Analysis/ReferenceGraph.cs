@@ -165,21 +165,24 @@ namespace StringTheory.Analysis
 
             public void Push(ClrObjectReference o)
             {
-                _last++;
+				if (o.TargetType != null)
+				{
+					_last++;
 
-                // resize if needed
-                if (_last == _levels.Length)
-                {
-                    var resized = new HeapWalkStackLevel[_levels.Length*2];
-                    Array.Copy(_levels, resized, _levels.Length);
-                    _levels = resized;
-                }
+					// resize if needed
+					if (_last == _levels.Length)
+					{
+						var resized = new HeapWalkStackLevel[_levels.Length * 2];
+						Array.Copy(_levels, resized, _levels.Length);
+						_levels = resized;
+					}
 
-                ref var level = ref _levels[_last];
-                level.Reference = o;
-                // TODO avoid allocation of enumerator?
-                level.Enumerator = o.TargetType.EnumerateObjectReferencesWithFields(o.Address, carefully: true).GetEnumerator();
-                level.GraphNode = null;
+					ref var level = ref _levels[_last];
+					level.Reference = o;
+					// TODO avoid allocation of enumerator?
+					level.Enumerator = o.TargetType.EnumerateObjectReferencesWithFields(o.Address, carefully: true).GetEnumerator();
+					level.GraphNode = null;
+				}
             }
 
             public int Count => _last + 1;
